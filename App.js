@@ -1,21 +1,68 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {Alert} from "react-native-web";
+import * as Location from "expo-location";
+import apiData from "./api/data";
+import Loading from "./view/Loading";
+import Weather from "./view/Weather";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+// api.openweathermap.org
+// Новый сгенерированный ключ активируется на протяжении 1-3 часов
+const API_KEY = '28c4ce0ad533aa1836be2d8174fadafd';
+
+export default class extends React.Component {
+  state = {
+    isLoading: true,
+    apiData: null,
+    main: null,
+    weather: null,
+  }
+
+  getWeathers = async (latitude, longitude) => {
+    const optMetric = 'units=metric'
+
+    try {
+      const data = await apiData.data(`lat=${latitude}&lon=${longitude}&appid=${API_KEY}&${optMetric}`)
+      this.setState({
+        apiData: data,
+        main: data.main,
+        weather: data.weather[0],
+      });
+    } catch (e) {
+      console.log('getWeathers() ERROR!', e);
+    }
+  }
+
+  getLocation = async () => {
+    try {
+      // throw Error();
+      // Запрос на получение доступа к геопозиции
+      await Location.requestPermissionsAsync();
+      // Получение данных о геопозиции
+      const {coords: {latitude, longitude}} = await Location.getCurrentPositionAsync();
+      await this.getWeathers(latitude, longitude); // TODO не более 60 запросов в минуту
+      this.setState({isLoading: false})
+    } catch (e) {
+      Alert.alert('Не могу определить местоположение');
+      console.log('getLocation() ERROR!', e);
+    }
+  }
+
+  componentDidMount() {
+    this.getLocation();
+  }
+
+  render () {
+    const {isLoading, apiData, main, weather} = this.state;
+
+    // TODO Debug
+    if (!isLoading) {
+      apiData ? console.log('Api Data: ', apiData) : null;
+      main ? console.log('Main Data: ', main) : null;
+      weather ? console.log('Weather Data: ', weather) : null;
+    }
+
+    return (
+      isLoading ? <Loading /> : <Weather main={main} weather={weather}/>
+    );
+  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
