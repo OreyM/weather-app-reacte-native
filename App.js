@@ -33,10 +33,7 @@ export default class extends React.Component {
 
   getLocation = async () => {
     try {
-      // throw Error();
-      // Запрос на получение доступа к геопозиции
       await Location.requestPermissionsAsync();
-      // Получение данных о геопозиции
       const {coords: {latitude, longitude}} = await Location.getCurrentPositionAsync();
       await this.getWeathers(latitude, longitude); // TODO не более 60 запросов в минуту
       this.setState({isLoading: false})
