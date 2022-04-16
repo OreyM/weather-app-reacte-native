@@ -6,8 +6,7 @@ import Loading from "./view/Loading";
 import Weather from "./view/Weather";
 
 // api.openweathermap.org
-// Новый сгенерированный ключ активируется на протяжении 1-3 часов
-const API_KEY = '28c4ce0ad533aa1836be2d8174fadafd';
+const API_KEY = '';
 
 export default class extends React.Component {
   state = {
